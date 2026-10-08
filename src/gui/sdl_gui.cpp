@@ -112,6 +112,12 @@ static float get_content_scale()
 	return (scale > 0.0f) ? scale : 1.0f;
 }
 
+static float get_window_display_scale()
+{
+	const auto result = SDL_GetWindowDisplayScale(sdl.window);
+	return (result == 0.0f) ? 1.0f : result;
+}
+
 static int to_native(const int logical)
 {
 	return WindowGeometry::LogicalToNative(logical, get_content_scale());
@@ -831,7 +837,7 @@ static WindowGeometry::Desktop get_desktop_geometry()
 
 	// Once the window exists, use its display scale; that reflects the
 	// actual pixel density of the window.
-	return {desktop.width, desktop.height, SDL_GetWindowDisplayScale(sdl.window)};
+	return {desktop.width, desktop.height, get_window_display_scale()};
 }
 
 DosBox::Rect GFX_GetDesktopSize()
@@ -853,7 +859,7 @@ DosBox::Rect GFX_LogicalToPixels(const DosBox::Rect& rect)
 {
 	assert(sdl.window);
 
-	return rect.Copy().Scale(SDL_GetWindowDisplayScale(sdl.window));
+	return rect.Copy().Scale(get_window_display_scale());
 }
 
 static void update_viewport()
@@ -2350,7 +2356,7 @@ static bool handle_sdl_windowevent(const SDL_Event& event)
 
 	case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED: {
 		log_window_event("SDL: Window display scale has changed to %g",
-		                 SDL_GetWindowDisplayScale(sdl.window));
+		                 get_window_display_scale());
 
 		// This happens when the window is moved to a display with a
 		// different scale, or when the display scale of the current
