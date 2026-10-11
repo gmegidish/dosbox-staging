@@ -1380,6 +1380,20 @@ static std::optional<WindowGeometry::PositionSetting> parse_window_position_sett
 		return {};
 	}
 
+#if defined(LINUX)
+	// Wayland doesn't let applications position their windows
+	if (is_using_video_driver("wayland")) {
+		NOTIFY_DisplayWarning(Notification::Source::Console,
+		                      "DISPLAY",
+		                      "PROGRAM_CONFIG_INVALID_SETTING_WITH_DETAILS",
+		                      "window_position",
+		                      window_position_pref.c_str(),
+		                      "Window positions are not supported on Wayland",
+		                      "auto");
+		return {};
+	}
+#endif
+
 	// Negative positions are rejected by the parser
 	const auto [x, y] = WindowGeometry::PositionToLogicalUnits(*position, desktop);
 
